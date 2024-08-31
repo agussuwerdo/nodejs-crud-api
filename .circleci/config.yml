@@ -23,6 +23,7 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
+          name: Build Node Project
           command: npm run build
       - run:
           name: Create the ~/artifacts directory if it doesn't exist
@@ -36,6 +37,7 @@ jobs:
           destination: node-build
 
   deploy-vercel:
+    # Deploy to Vercel
     executor: node/default
     steps:
       - checkout
@@ -55,13 +57,22 @@ jobs:
   notify-slack:
     executor: node/default
     steps:
+      - checkout
+      - run:
+          name: Debug - Print working directory
+          command: pwd
+      - run:
+          name: Debug - List directory contents
+          command: ls -al
       - run:
           name: Send Slack Notification
           command: |
-            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"Deployment to Vercel is complete.\"}" $SLACK_WEBHOOK_URL
+            APP_NAME=$(cat package.json | grep '"name"' | head -n 1 | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+            VERSION=$(cat package.json | grep '"version"' | head -n 1 | awk -F: '{ print $2 }' | sed 's/[", ]//g')
+            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"Deployment of \`${APP_NAME}\`, version \`${VERSION}\` is complete.\"}" $SLACK_WEBHOOK_URL
 
 workflows:
-  build-and-test:
+  test-build-and-deploy:
     jobs:
       - test-node
       - build-node:
