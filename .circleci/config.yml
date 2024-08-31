@@ -36,20 +36,17 @@ jobs:
           destination: node-build
 
   deploy-vercel:
-    # Deploy the project to Vercel
     executor: node/default
     steps:
       - checkout
       - node/install-packages:
           pkg-manager: npm
       - run:
-          name: Install Vercel CLI
-          command: npm install -g vercel
+          name: Install Vercel CLI Locally
+          command: npm install vercel
       - run:
           name: Deploy to Vercel
-          command: |
-            vercel --token $VERCEL_TOKEN --prod
-      # Optionally, you can store deployment URLs or logs as artifacts
+          command: ./node_modules/.bin/vercel --token $VERCEL_TOKEN --prod
       - run:
           name: Store Deployment Information
           command: |
