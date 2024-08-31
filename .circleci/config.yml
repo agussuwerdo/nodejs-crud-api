@@ -115,9 +115,7 @@ workflows:
               only:
                 - main
                 - master
-
-  notify-on-failure:
-    jobs:
+          when: on_success
       - notify-slack-failure:
           requires:
             - test-node
