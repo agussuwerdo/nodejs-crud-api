@@ -46,7 +46,7 @@ jobs:
           command: npm install vercel
       - run:
           name: Deploy to Vercel
-          command: VERCEL_PROJECT_ID=nodejs-crud ./node_modules/.bin/vercel --token $VERCEL_TOKEN --prod --yes
+          command: VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID VERCEL_ORG_ID=$VERCEL_ORG_ID ./node_modules/.bin/vercel --token $VERCEL_TOKEN --prod --yes
       - run:
           name: Store Deployment Information
           command: |
