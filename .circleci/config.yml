@@ -5,7 +5,6 @@ orbs:
 
 jobs:
   test-node:
-    # Install node dependencies and run tests
     executor: node/default
     steps:
       - checkout
@@ -54,7 +53,7 @@ jobs:
           command: |
             echo "Vercel deployment completed."
 
-  notify-slack:
+  notify-slack-success:
     executor: node/default
     steps:
       - checkout
@@ -65,7 +64,7 @@ jobs:
           name: Debug - List directory contents
           command: ls -al
       - run:
-          name: Send Slack Notification
+          name: Send Slack Notification on Sucess
           command: |
             APP_NAME=$(cat package.json | grep '"name"' | head -n 1 | awk -F: '{ print $2 }' | sed 's/[", ]//g')
             VERSION=$(cat package.json | grep '"version"' | head -n 1 | awk -F: '{ print $2 }' | sed 's/[", ]//g')
@@ -82,7 +81,7 @@ jobs:
           name: Debug - List directory contents
           command: ls -al
       - run:
-          name: Send Slack Notification for Failure
+          name: Send Slack Notification on Failure
           command: |
             APP_NAME=$(cat package.json | grep '"name"' | head -n 1 | awk -F: '{ print $2 }' | sed 's/[", ]//g')
             curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"CI for \`${APP_NAME}\` has failed. Please check the logs for details.\"}" $SLACK_WEBHOOK_URL
@@ -107,7 +106,7 @@ workflows:
               only:
                 - main
                 - master
-      - notify-slack:
+      - notify-slack-success:
           requires:
             - deploy-vercel
           filters:
@@ -115,10 +114,20 @@ workflows:
               only:
                 - main
                 - master
+          # Run only on success
           when: on_success
+
+  notify-on-failure:
+    jobs:
       - notify-slack-failure:
           requires:
             - test-node
             - build-node
             - deploy-vercel
+          filters:
+            branches:
+              only:
+                - main
+                - master
+          # Run only on failure
           when: on_fail
