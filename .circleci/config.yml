@@ -52,6 +52,14 @@ jobs:
           command: |
             echo "Vercel deployment completed."
 
+  notify-email:
+    executor: node/default
+    steps:
+      - run:
+          name: Send Email Notification
+          command: |
+            echo "Deployment to Vercel is complete." | mail -s "Deployment Success" agussuwerdo@gmail.com
+
 workflows:
   build-and-test:
     jobs:
@@ -67,6 +75,14 @@ workflows:
       - deploy-vercel:
           requires:
             - build-node
+          filters:
+            branches:
+              only:
+                - main
+                - master
+      - notify-email:
+          requires:
+            - deploy-vercel
           filters:
             branches:
               only:
