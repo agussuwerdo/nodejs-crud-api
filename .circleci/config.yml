@@ -46,7 +46,7 @@ jobs:
           command: npm install vercel
       - run:
           name: Deploy to Vercel
-          command: ./node_modules/.bin/vercel --token $VERCEL_TOKEN --prod
+          command: ./node_modules/.bin/vercel --token $VERCEL_TOKEN --prod --confirm
       - run:
           name: Store Deployment Information
           command: |
