@@ -118,4 +118,9 @@ workflows:
 
   notify-on-failure:
     jobs:
-      - notify-slack-failure
+      - notify-slack-failure:
+          requires:
+            - test-node
+            - build-node
+            - deploy-vercel
+          when: on_fail
