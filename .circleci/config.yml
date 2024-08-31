@@ -1,0 +1,67 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5
+
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Run tests
+          command: echo "No test specified in package.json"
+
+  build-node:
+    # Build node project
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          command: npm run build
+      - run:
+          name: Create the ~/artifacts directory if it doesn't exist
+          command: mkdir -p ~/artifacts
+      # Copy output to artifacts dir
+      - run:
+          name: Copy artifacts
+          command: cp -R build dist public .output .next .docusaurus ~/artifacts 2>/dev/null || true
+      - store_artifacts:
+          path: ~/artifacts
+          destination: node-build
+
+  deploy-vercel:
+    # Deploy the project to Vercel
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Install Vercel CLI
+          command: npm install -g vercel
+      - run:
+          name: Deploy to Vercel
+          command: |
+            vercel --token $VERCEL_TOKEN --prod
+      # Optionally, you can store deployment URLs or logs as artifacts
+      - run:
+          name: Store Deployment Information
+          command: |
+            echo "Vercel deployment completed."
+
+workflows:
+  build-and-test:
+    jobs:
+      - test-node
+      - build-node:
+          requires:
+            - test-node
+      - deploy-vercel:
+          requires:
+            - build-node
