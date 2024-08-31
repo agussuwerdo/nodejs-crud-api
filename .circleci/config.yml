@@ -74,6 +74,13 @@ jobs:
   notify-slack-failure:
     executor: node/default
     steps:
+      - checkout
+      - run:
+          name: Debug - Print working directory
+          command: pwd
+      - run:
+          name: Debug - List directory contents
+          command: ls -al
       - run:
           name: Send Slack Notification for Failure
           command: |
